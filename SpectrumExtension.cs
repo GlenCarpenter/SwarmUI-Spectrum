@@ -41,6 +41,9 @@ public class SpectrumExtension : Extension
     /// <summary>Residual blending strength in calibrated mode.</summary>
     public static T2IRegisteredParam<double> SpectrumCalibrationStrength;
 
+    /// <summary>Which model sampling stages Spectrum should run on.</summary>
+    public static T2IRegisteredParam<string> SpectrumApplyTo;
+
     /// <summary>Parameter group for all Spectrum settings.</summary>
     public static T2IParamGroup SpectrumGroup;
 
@@ -146,6 +149,15 @@ public class SpectrumExtension : Extension
             DependNonDefault: SpectrumCalibrated.Type.ID,
             Examples: ["0.5", "0.8"]
             ));
+        SpectrumApplyTo = T2IParamTypes.Register<string>(new("[Spectrum] Apply To",
+            "[Spectrum]\nWhich model sampling stages Spectrum should accelerate.\n"
+            + "'all' applies Spectrum to every stage (base, refiner, video).\n"
+            + "'base gen only' applies only to the base model pass (default).\n"
+            + "'refiner only' applies only to the refiner pass.",
+            "base gen only",
+            GetValues: (_) => ["all", "base gen only///base gen only (no refiner or video)", "refiner only"],
+            Group: SpectrumGroup, FeatureFlag: "comfyui", OrderPriority: 10
+            ));
         // Run as a model gen step at -3, matching TeaCache's priority.
         // This wraps g.LoadingModel after LoRAs, FreeU, and other model patches have been applied.
         WorkflowGenerator.AddModelGenStep(g =>
@@ -154,8 +166,12 @@ public class SpectrumExtension : Extension
             {
                 return;
             }
-            // Only apply to the base model pass, not the refiner pass.
-            if (g.LoadingModelType != "Base")
+            string applyTo = g.UserInput.Get(SpectrumApplyTo, "base gen only");
+            if (applyTo == "base gen only" && g.LoadingModelType != "Base")
+            {
+                return;
+            }
+            if (applyTo == "refiner only" && g.LoadingModelType == "Base")
             {
                 return;
             }
