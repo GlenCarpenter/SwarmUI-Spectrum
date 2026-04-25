@@ -1,6 +1,6 @@
 # SwarmUI Spectrum Extension
 
-A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) extension that integrates **Spectrum** — a training-free diffusion sampling acceleration technique — directly into SwarmUI's generation pipeline.
+A [SwarmUI](https://github.com/mcmonkeyprojects/SwarmUI) extension that integrates **Spectrum**,  a training-free diffusion sampling acceleration technique directly, into SwarmUI's's generation pipeline.
 
 Spectrum reduces the number of expensive neural network denoiser calls during a sampling run by forecasting the outputs of skipped steps using **Chebyshev polynomial regression**. Depending on model and settings, this can reduce generation time by **2–4×** with minimal quality loss.
 
