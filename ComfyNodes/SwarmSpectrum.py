@@ -200,10 +200,23 @@ class SwarmSpectrum:
             "total_steps": steps,
         }
 
+        # Capture any pre-existing wrapper (e.g. Chroma Radiance) so we can chain it.
+        # Spectrum sits outermost: it decides whether to run the inner pipeline at all,
+        # or substitute a forecast instead. For real passes it delegates to the inner
+        # chain (old_wrapper → model_function), preserving any upstream behaviour.
+        old_wrapper = model.model_options.get("model_function_wrapper")
+
+        def _call_inner(model_function, kwargs):
+            """Call either the chained old wrapper or model_function directly."""
+            if old_wrapper is not None:
+                return old_wrapper(model_function, kwargs)
+            return model_function(kwargs["input"], kwargs["timestep"], **kwargs["c"])
+
         def spectrum_wrapper(model_function, kwargs):
             x = kwargs["input"]
             timestep = kwargs["timestep"]
             c = kwargs["c"]
+            cond_or_uncond = kwargs.get("cond_or_uncond")
             batch_size = x.shape[0]
             t_scalar = float(timestep.flatten()[0]) if isinstance(timestep, torch.Tensor) else float(timestep)
             # Detect the start of a new denoising pass (timestep reset to a higher value)
@@ -232,13 +245,16 @@ class SwarmSpectrum:
                 ws = max(1, math.floor(state["curr_ws"]))
                 do_real[i] = (state["num_cached"][i] + 1) % ws == 0
             out = torch.empty_like(x)
-            # --- Real denoiser forward pass ---
+            # --- Real denoiser forward pass (chains into old_wrapper if present) ---
             if do_real.any():
                 real_idx = do_real.nonzero(as_tuple=False).flatten().tolist()
                 x_real = x[do_real]
                 ts_real = _slice_batch(timestep, real_idx, batch_size)
                 c_real = {k: _slice_batch(v, real_idx, batch_size) for k, v in c.items()}
-                out_real = model_function(x_real, ts_real, **c_real)
+                inner_kwargs = {"input": x_real, "timestep": ts_real, "c": c_real}
+                if cond_or_uncond is not None:
+                    inner_kwargs["cond_or_uncond"] = _slice_batch(cond_or_uncond, real_idx, batch_size)
+                out_real = _call_inner(model_function, inner_kwargs)
                 out[do_real] = out_real
                 for j, idx in enumerate(real_idx):
                     f = state["forecasters"][idx]
@@ -246,7 +262,7 @@ class SwarmSpectrum:
                         f.record_residual(out_real[j])
                     f.update(state["cnt"], out_real[j])
                     state["num_cached"][idx] = 0
-            # --- Forecasted steps ---
+            # --- Forecasted steps (no inner call — pure math) ---
             do_forecast = ~do_real
             if do_forecast.any():
                 forecast_idx = do_forecast.nonzero(as_tuple=False).flatten().tolist()
