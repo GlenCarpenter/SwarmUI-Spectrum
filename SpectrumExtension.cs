@@ -53,6 +53,7 @@ public class SpectrumExtension : Extension
         {
             ComfyUISelfStartBackend.CustomNodePaths.Add(comfyNodesPath);
         }
+        ScriptFiles.Add("Assets/spectrum_ui.js");
     }
 
     /// <inheritdoc/>
