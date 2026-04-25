@@ -154,8 +154,8 @@ public class SpectrumExtension : Extension
             + "'all' applies Spectrum to every stage (base, refiner, video).\n"
             + "'base gen only' applies only to the base model pass (default).\n"
             + "'refiner only' applies only to the refiner pass.",
-            "base gen only",
-            GetValues: (_) => ["all", "base gen only///base gen only (no refiner or video)", "refiner only"],
+            "all",
+            GetValues: (_) => ["all///all (base, refiner, video, videoswap)", "base gen only///base only (base, video, videoswap)", "refiner only"],
             Group: SpectrumGroup, FeatureFlag: "comfyui", OrderPriority: 10
             ));
         // Run as a model gen step at -3, matching TeaCache's priority.
@@ -166,7 +166,7 @@ public class SpectrumExtension : Extension
             {
                 return;
             }
-            string applyTo = g.UserInput.Get(SpectrumApplyTo, "base gen only");
+            string applyTo = g.UserInput.Get(SpectrumApplyTo, "all");
             if (applyTo == "base gen only" && g.LoadingModelType != "Base")
             {
                 return;
