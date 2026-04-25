@@ -39,10 +39,6 @@ Any model compatible with ComfyUI's `set_model_unet_function_wrapper` API:
 
 ## Installation
 
-### Self-Start ComfyUI (Recommended)
-
-The ComfyUI node ships inside the extension — no separate node install needed. SwarmUI will register it automatically on startup.
-
 1. Open a terminal and navigate to your SwarmUI `src/Extensions` folder:
    ```
    cd SwarmUI/src/Extensions
