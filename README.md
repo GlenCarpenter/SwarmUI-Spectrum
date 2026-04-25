@@ -41,17 +41,17 @@ Any model compatible with ComfyUI's `set_model_unet_function_wrapper` API:
 
 ### Self-Start ComfyUI (Recommended)
 
-The ComfyUI node ships inside the extension. No separate install needed — just add the extension to SwarmUI and the node will be registered automatically.
+The ComfyUI node ships inside the extension — no separate node install needed. SwarmUI will register it automatically on startup.
 
-1. In SwarmUI, go to the **Extensions** tab
-2. Install this extension
+1. Open a terminal and navigate to your SwarmUI `src/Extensions` folder:
+   ```
+   cd SwarmUI/src/Extensions
+   ```
+2. Clone the repository:
+   ```
+   git clone https://github.com/GlenCarpenter/SwarmUI-Spectrum.git
+   ```
 3. Restart SwarmUI
-
-### Remote / Manual ComfyUI
-
-Copy the `ComfyNodes/` folder from this extension into your ComfyUI `custom_nodes/` directory, then restart ComfyUI.
-
----
 
 ## Parameters
 
