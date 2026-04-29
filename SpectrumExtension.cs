@@ -5,8 +5,7 @@ using SwarmUI.Core;
 using SwarmUI.Text2Image;
 using SwarmUI.Utils;
 
-// NOTE: Namespace must NOT contain "SwarmUI" (reserved for built-ins).
-namespace SpectrumForecaster;
+namespace GlenCarpenter.Extensions.SpectrumExtension;
 
 /// <summary>Extension that integrates Spectrum sampling acceleration into SwarmUI via a built-in ComfyUI node.
 /// Supports SDXL, Flux, Wan, SD3, HunyuanVideo, Chroma, and any other ComfyUI-compatible diffusion model.
